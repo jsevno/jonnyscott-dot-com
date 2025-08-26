@@ -1,10 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  trailingSlash: true,
   images: {
-    unoptimized: true,
-    domains: ['assets.jonnyscott.com', 'images.unsplash.com', 'cdn.ghost.io'],
+    domains: ['assets.jonnyscott.com', 'images.unsplash.com', 'cdn.ghost.io', 'jdcevno.ghost.io'],
     formats: ['image/webp', 'image/avif'],
   },
   async headers() {

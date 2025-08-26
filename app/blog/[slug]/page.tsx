@@ -1,13 +1,26 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
-import { getPost, formatDate } from '@/lib/ghost'
+import { getPost, getPosts, formatDate } from '@/lib/ghost'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
 interface PostPageProps {
   params: {
     slug: string
+  }
+}
+
+// Generate static params for all blog posts
+export async function generateStaticParams() {
+  try {
+    const posts = await getPosts()
+    return posts.map((post) => ({
+      slug: post.slug,
+    }))
+  } catch (error) {
+    console.error('Error generating static params:', error)
+    return []
   }
 }
 
