@@ -14,7 +14,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const axios = require('axios');
+const GhostAdminAPI = require('@tryghost/admin-api');
 require('dotenv').config({ path: '.env.local' });
 
 // Configuration
@@ -28,6 +28,13 @@ if (!GHOST_URL || !GHOST_ADMIN_API_KEY) {
   console.error('\nPlease check your .env.local file.');
   process.exit(1);
 }
+
+// Initialize Ghost Admin API client
+const api = new GhostAdminAPI({
+  url: GHOST_URL,
+  key: GHOST_ADMIN_API_KEY,
+  version: 'v6.0'
+});
 
 // Parse frontmatter from markdown
 function parseFrontmatter(content) {
@@ -90,25 +97,17 @@ function markdownToHtml(markdown) {
   return html;
 }
 
-// Publish post to Ghost
+// Publish post to Ghost using official client
 async function publishToGhost(postData) {
   try {
-    const response = await axios.post(
-      `${GHOST_URL}/ghost/api/admin/posts/`,
-      {
-        posts: [postData]
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Ghost ${GHOST_ADMIN_API_KEY}`
-        }
-      }
-    );
-    
-    return response.data.posts[0];
+    console.log('📤 Publishing to Ghost CMS...');
+    const publishedPost = await api.posts.add(postData);
+    return publishedPost;
   } catch (error) {
-    console.error('❌ Error publishing to Ghost:', error.response?.data || error.message);
+    console.error('❌ Error publishing to Ghost:', error.message);
+    if (error.context) {
+      console.error('Context:', error.context);
+    }
     throw error;
   }
 }
@@ -151,7 +150,6 @@ async function main() {
       meta_description: frontmatter.og_description
     };
     
-    console.log('📤 Publishing to Ghost CMS...');
     const publishedPost = await publishToGhost(postData);
     
     console.log('✅ Post published successfully!');
